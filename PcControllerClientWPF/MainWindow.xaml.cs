@@ -10,6 +10,8 @@ namespace PcControllerClientWPF
 {
     public partial class MainWindow : Window
     {
+        private bool streamScreen = false;
+        private SocketRequests socketRequests;
         public MainWindow()
         {
             InitializeComponent();
@@ -22,8 +24,6 @@ namespace PcControllerClientWPF
             StreamScreenButton.IsEnabled = false;
             StopStreamButton.IsEnabled = false;
         }
-        private bool streamScreen = false;
-        private SocketRequests socketRequests;
         public void ConnectClicked(object sender, EventArgs e)
         {
             try
@@ -59,7 +59,7 @@ namespace PcControllerClientWPF
                     string result = socketRequests.MoveMouseRequest(RepeatsTextBox.Text, IntervalTextBox.Text);
                     if (result == "ERROR")
                     {
-                        string messageBoxText = $"Trouble on server";
+                        string messageBoxText = "Trouble on server";
                         string caption = "Error";
                         MessageBox.Show(messageBoxText, caption, MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.Yes);
                     }
