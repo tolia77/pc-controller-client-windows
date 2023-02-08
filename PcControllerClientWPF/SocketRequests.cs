@@ -26,13 +26,13 @@ namespace SocketApp
         public SocketInfo(IPAddress ipAddress)
         {
             IpAddress = ipAddress;
-            MoveMouseEndpoint = new IPEndPoint(IpAddress, 50000);
-            GetScreenshotEndpoint = new IPEndPoint(IpAddress, 50001);
-            OpenLinkEndpoint = new IPEndPoint(IpAddress, 50002);
-            CmdExecuteEndpoint = new IPEndPoint(IpAddress, 50003);
-            ShutdownPcEndpoint = new IPEndPoint(IpAddress, 50004);
-            RestartPcEndpoint = new IPEndPoint(IpAddress, 50005);
-            StreamScreenEndPoint = new IPEndPoint(IpAddress, 50006);
+            MoveMouseEndpoint = new IPEndPoint(IpAddress, 40000);
+            GetScreenshotEndpoint = new IPEndPoint(IpAddress, 40001);
+            OpenLinkEndpoint = new IPEndPoint(IpAddress, 40002);
+            CmdExecuteEndpoint = new IPEndPoint(IpAddress, 40003);
+            ShutdownPcEndpoint = new IPEndPoint(IpAddress, 40004);
+            RestartPcEndpoint = new IPEndPoint(IpAddress, 40005);
+            StreamScreenEndPoint = new IPEndPoint(IpAddress, 40006);
         }
     }
     public class SocketRequests
@@ -43,7 +43,7 @@ namespace SocketApp
         {
             ipAddress = IPAddress.Parse(ip);
             SocketInfo = new(ipAddress);
-            IPEndPoint endpoint = new(ipAddress, 49999);
+            IPEndPoint endpoint = new(ipAddress, 39999);
             Socket socketSender = new(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             socketSender.Connect(endpoint);
         }
