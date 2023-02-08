@@ -5,6 +5,9 @@ using System.Windows.Media.Imaging;
 using System.IO;
 using System.Windows.Threading;
 using SocketApp;
+using System.Net.Sockets;
+using System.Net;
+using System.Text;
 
 namespace PcControllerClientWPF
 {
@@ -167,12 +170,15 @@ namespace PcControllerClientWPF
         }
         public void StreamScreen()
         {
+            Socket socketSender = socketRequests.SocketInfo.AutoSocket;
+            socketSender.Connect(socketRequests.SocketInfo.StreamScreenEndPoint);
             streamScreen = true;
             while (streamScreen)
             {
                 try
                 {
-                    using Stream stream = new MemoryStream(socketRequests.GetScreenshotRequest());
+                    byte[] screenshot = SocketRequests.GetStreamScreen(socketSender);
+                    Stream stream = new MemoryStream(screenshot);
                     BitmapImage image = new();
                     stream.Position = 0;
                     image.BeginInit();
@@ -180,10 +186,11 @@ namespace PcControllerClientWPF
                     image.StreamSource = stream;
                     image.EndInit();
                     image.Freeze();
-                    Dispatcher.BeginInvoke(DispatcherPriority.Normal, (ThreadStart)delegate
+                    Dispatcher.BeginInvoke(DispatcherPriority.Send, (ThreadStart)delegate
                     {
                         ScreenshotImage.Source = image;
                     });
+                    stream.Dispose();
                 }
                 catch (Exception ex)
                 {

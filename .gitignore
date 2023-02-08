@@ -1,4 +1,5 @@
 PcControllerClient_dotnet/
 PcControllerClient_selfcontained/
+.vs/
 PcControllerClient_dotnet.7z
 PcControllerClient_selfcontained.7z

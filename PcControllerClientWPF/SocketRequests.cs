@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using System.Collections.Generic;
 using System.Text;
+using System;
 
 namespace SocketApp
 {
@@ -14,6 +15,7 @@ namespace SocketApp
         public IPEndPoint CmdExecuteEndpoint { get; set; }
         public IPEndPoint ShutdownPcEndpoint { get; set; }
         public IPEndPoint RestartPcEndpoint { get; set; }
+        public IPEndPoint StreamScreenEndPoint { get; set; }
         public IPAddress IpAddress { get; set; }
         public Socket AutoSocket
         {
@@ -30,17 +32,17 @@ namespace SocketApp
             CmdExecuteEndpoint = new IPEndPoint(IpAddress, 50003);
             ShutdownPcEndpoint = new IPEndPoint(IpAddress, 50004);
             RestartPcEndpoint = new IPEndPoint(IpAddress, 50005);
-
+            StreamScreenEndPoint = new IPEndPoint(IpAddress, 50006);
         }
     }
     public class SocketRequests
     {
         private readonly IPAddress ipAddress;
-        private readonly SocketInfo socketInfo;
+        public SocketInfo SocketInfo;
         public SocketRequests(string ip)
         {
             ipAddress = IPAddress.Parse(ip);
-            socketInfo = new(ipAddress);
+            SocketInfo = new(ipAddress);
             IPEndPoint endpoint = new(ipAddress, 49999);
             Socket socketSender = new(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             socketSender.Connect(endpoint);
@@ -64,8 +66,8 @@ namespace SocketApp
         }
         public string MoveMouseRequest(string repeats, string interval)
         {
-            Socket socketSender = socketInfo.AutoSocket;
-            string data = ""; socketSender.Connect(socketInfo.MoveMouseEndpoint);
+            Socket socketSender = SocketInfo.AutoSocket;
+            string data = ""; socketSender.Connect(SocketInfo.MoveMouseEndpoint);
             byte[] msg = Encoding.ASCII.GetBytes($"{repeats} {interval}");
             socketSender.Send(msg);
             byte[] bytes = ReceiveAll(socketSender);
@@ -75,8 +77,8 @@ namespace SocketApp
         }
         public string OpenLinkRequest(string link)
         {
-            Socket socketSender = socketInfo.AutoSocket;
-            string data = ""; socketSender.Connect(socketInfo.OpenLinkEndpoint);
+            Socket socketSender = SocketInfo.AutoSocket;
+            string data = ""; socketSender.Connect(SocketInfo.OpenLinkEndpoint);
             byte[] msg = Encoding.ASCII.GetBytes(link);
             socketSender.Send(msg);
             byte[] bytes = ReceiveAll(socketSender);
@@ -85,8 +87,8 @@ namespace SocketApp
         }
         public string CmdExecuteRequest(string command)
         {
-            Socket socketSender = socketInfo.AutoSocket;
-            string data = ""; socketSender.Connect(socketInfo.CmdExecuteEndpoint);
+            Socket socketSender = SocketInfo.AutoSocket;
+            string data = ""; socketSender.Connect(SocketInfo.CmdExecuteEndpoint);
             byte[] msg = Encoding.ASCII.GetBytes(command);
             socketSender.Send(msg);
             byte[] bytes = ReceiveAll(socketSender);
@@ -95,20 +97,45 @@ namespace SocketApp
         }
         public string ShutdownPcRequest()
         {
-            socketInfo.AutoSocket.Connect(socketInfo.ShutdownPcEndpoint);
+            SocketInfo.AutoSocket.Connect(SocketInfo.ShutdownPcEndpoint);
             return "SUCCESS";
         }
         public string RestartPcRequest()
         {
-            socketInfo.AutoSocket.Connect(socketInfo.RestartPcEndpoint);
+            SocketInfo.AutoSocket.Connect(SocketInfo.RestartPcEndpoint);
             return "SUCCESS";
         }
         public byte[] GetScreenshotRequest()
         {
-            Socket socketSender = socketInfo.AutoSocket;
-            socketSender.Connect(socketInfo.GetScreenshotEndpoint);
+            Socket socketSender = SocketInfo.AutoSocket;
+            socketSender.Connect(SocketInfo.GetScreenshotEndpoint);
             byte[] bytes = ReceiveAll(socketSender);
             return bytes;
+        }
+
+        public static byte[] GetStreamScreen(Socket socketSender)
+        {
+            int total = 0;
+            int recv;
+            byte[] datasize = new byte[4];
+
+            recv = socketSender.Receive(datasize, 0, 4, 0);
+            int size = BitConverter.ToInt32(datasize, 0);
+            int dataleft = size;
+            byte[] data = new byte[size];
+
+
+            while (total < size)
+            {
+                recv = socketSender.Receive(data, total, dataleft, 0);
+                if (recv == 0)
+                {
+                    break;
+                }
+                total += recv;
+                dataleft -= recv;
+            }
+            return data;
         }
     }
 }
